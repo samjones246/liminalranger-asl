@@ -37,7 +37,6 @@ init
     // Variable to store the id of the level, since the levelid address is volatile during level transitions
     vars.split = 1;
     vars.MAX_SPLIT = settings["trueEnd"] ? 15 : 16;
-    vars.startTime = 0;
 
     // Freezes left before true ending
     vars.teFreezesLeft = 3;
@@ -63,17 +62,10 @@ start
         if (vars.ready == 2){
             vars.ready = 0;
             vars.Log("Starting Timer");
-            vars.startTime = current.frameCount;
             return true;
         }
     }
     return false;
-}
-
-gameTime
-{
-    double total_mills = ((current.frameCount - vars.startTime) / 60.0) * 1000.0;
-    return new TimeSpan(0,0,0,0,Convert.ToInt32(total_mills));
 }
 
 isLoading
