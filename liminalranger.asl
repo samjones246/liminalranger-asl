@@ -4,6 +4,8 @@ state("liminal ranger 1.2")
     int levelid : 0x20938E0;
 
     bool frozen : 0x02094B20, 0x1C8, 0x50, 0x20, 0x8, 0x50, 0x20, 0xC8;
+
+    int frameCount : 0x003E2BF4, 0x51C, 0x18, 0x0, 0x0, 0x28, 0x748, 0x88;
 }
 
 startup
@@ -35,6 +37,7 @@ init
     // Variable to store the id of the level, since the levelid address is volatile during level transitions
     vars.split = 1;
     vars.MAX_SPLIT = settings["trueEnd"] ? 15 : 16;
+    vars.startTime = 0;
 
     // Freezes left before true ending
     vars.teFreezesLeft = 3;
@@ -60,10 +63,22 @@ start
         if (vars.ready == 2){
             vars.ready = 0;
             vars.Log("Starting Timer");
+            vars.startTime = current.frameCount;
             return true;
         }
     }
     return false;
+}
+
+gameTime
+{
+    double total_mills = ((current.frameCount - vars.startTime) / 60.0) * 1000.0;
+    return new TimeSpan(0,0,0,0,Convert.ToInt32(total_mills));
+}
+
+isLoading
+{
+    return current.frameCount == old.frameCount;
 }
 
 split
