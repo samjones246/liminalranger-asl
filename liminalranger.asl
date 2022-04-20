@@ -2,6 +2,8 @@ state("liminal ranger 1.2")
 {
     // Pointer to the id for the current level
     int levelid : 0x20938E0;
+
+    bool frozen : 0x02094B20, 0x1C8, 0x50, 0x20, 0x8, 0x50, 0x20, 0xC8;
 }
 
 startup
@@ -23,13 +25,19 @@ startup
     settings.Add("12", true, "Split after Corridor (Entrance)");
     settings.Add("13", true, "Split after Something's Off");
     settings.Add("14", true, "Split after Corridor (Main)");
-    settings.Add("15", true, "Split after Office 5");
+    settings.Add("15", true, "Split after Office 5 (Normal ending only)");
+
+    settings.Add("trueEnd", false, "True Ending");
 }
 
 init
 { 
     // Variable to store the id of the level, since the levelid address is volatile during level transitions
     vars.split = 1;
+    vars.MAX_SPLIT = settings["trueEnd"] ? 15 : 16;
+
+    // Freezes left before true ending
+    vars.teFreezesLeft = 3;
 
     // Used to keep track of madness when game starts up
     vars.ready = 0;
@@ -61,7 +69,7 @@ start
 split
 {
     // Split when levelid increments, and update vars.split
-    if (vars.split < 16){
+    if (vars.split < vars.MAX_SPLIT){
         if (current.levelid == vars.split + 1){
             vars.split = current.levelid;
             vars.Log("Splitting");
@@ -73,7 +81,17 @@ split
 
     // On last level, split as soon as levelid changes to anything higher than current, as this indicates the end cutscene is loading
     }else{
-        if (current.levelid > vars.split){
+        if (settings["trueEnd"]){
+            if (current.frozen && !old.frozen){
+                if (vars.teFreezesLeft == 0){
+                    return true;
+                }else{
+                    vars.teFreezesLeft -= 1;
+                }
+                vars.Log("Freezes left: " + vars.teFreezesLeft);
+            }
+        }
+        else if (current.levelid > vars.split){
             vars.Log("Final Split");
             return true;
         }
