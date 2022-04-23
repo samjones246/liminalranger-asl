@@ -40,30 +40,12 @@ init
 
     // Freezes left before true ending
     vars.teFreezesLeft = 3;
-
-    // Used to keep track of madness when game starts up
-    vars.ready = 0;
 }
 
 start
 {
-    // If levelid is 0 after having been 1, madness is over and player is in the menu
-    if (current.levelid == 0){
-        if (vars.ready == 1){
-            vars.ready = 2;
-        }
-        return false;
-    }
-    // If levelid is 1, either it's pre-menu madness or the player has started the first level
-    if (current.levelid == 1){
-        if(vars.ready == 0){
-            vars.ready = 1;
-        }
-        if (vars.ready == 2){
-            vars.ready = 0;
-            vars.Log("Starting Timer");
-            return true;
-        }
+    if (old.isLoading && !current.isLoading && current.levelid == 1){
+        return true;
     }
     return false;
 }
