@@ -1,8 +1,8 @@
 state("LiminalRanger Windows 1.3")
 {
-    bool frozen : "msvcrt.dll", 0x95940, 0xE8;
-
     bool isLoading : 0x021D9B80, 0xF0, 0x108, 0x8, 0x108, 0x0, 0x14;
+
+    bool endFlyStarted : 0x021D9B80, 0x1D0, 0x108, 0x0, 0x108, 0x0, 0x108, 0x130, 0x150;
 }
 
 startup
@@ -32,9 +32,6 @@ init
 {
     // Variable to store the id of the level, since the levelid address is volatile during level transitions
     vars.officeVisit = 1;
-
-    // Freezes left before true ending
-    vars.teFreezesLeft = 3;
 
     // SceneTree.singleton.current_scene.data.scene_file_path
     vars.sceneNamePtr = new MemoryWatcher<int>(new DeepPointer("LiminalRanger Windows 1.3.exe", 0x21D9B80, 0x1D0, 0xD8));
@@ -83,14 +80,9 @@ split
     }
 
     // True ending
-    if (current.levelname == "GlowingHalls"){
-        if (current.frozen && !old.frozen){
-            if (vars.teFreezesLeft == 0){
-                return true;
-            }else{
-                vars.teFreezesLeft -= 1;
-            }
-            vars.Log("Freezes left: " + vars.teFreezesLeft);
+    if (current.levelname == "glowingHalls"){
+        if (current.endFlyStarted && ! old.endFlyStarted) {
+            return true;
         }
     }
     return false;
